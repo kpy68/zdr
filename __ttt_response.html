@@ -1,0 +1,231 @@
+﻿<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no">
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Language" content="zh-cn" />
+    <meta name="applicable-device" content="mobile">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta content="telephone=no" name="format-detection">
+   <!-- <link rel="stylesheet" href="https://apps.bdimg.com/libs/jquerymobile/1.4.5/jquery.mobile-1.4.5.min.css">-->
+    <script src="https://apps.bdimg.com/libs/jquery/1.10.2/jquery.min.js"></script>
+    <script src="js/d.js"></script>
+    <script language="javascript">
+        /*window.setTimeout("location.reload();",30000);*/
+    </script>
+
+    <style type="text/css">
+        * { margin: 0; padding: 0;}
+        body { background: #fff;}
+
+        .new-KJ-TabBox-box { font-size: 16px; height: 130px; box-sizing: border-box; color:#333; padding: 8px; font-family: 'PingFang SC', 'microsoft yahei', arial, 'helvetica neue', 'hiragino sans gb', sans-serif;}
+        .new-KJ-TabBox-box a { text-decoration: none;}
+        .new-KJ-TabBox-box .kj-font-red { color: #f00!important;}
+        .new-KJ-TabBox-box-tit { display: flex; align-items: center; height: 17px; line-height: 17px; font-size: 17px;}
+        .new-KJ-TabBox-box-tit-l {}
+        .new-KJ-TabBox-box-tit-m { flex: 1; text-align: center; font-weight: bold;}
+        .new-KJ-TabBox-box-tit-m span {font-weight: bold;!important;}
+        .new-KJ-TabBox-box-tit-r {}
+        .new-KJ-TabBox-box-con { display: flex; margin: 8px 0;}
+        .new-KJ-TabBox-box-con .kj-ball { flex: 1;display: flex;align-items: center;justify-content: center; height: 61px; text-align: center; border-radius: 4px; margin-right: 6px; box-sizing: border-box;flex-direction: column;}
+        .new-KJ-TabBox-box-con .kj-ball:last-child { margin-right: 0;}
+        .new-KJ-TabBox-box-con .kj-ball:nth-last-child(3) { margin-right: 6px;}
+        .new-KJ-TabBox-box-con .kj-ball h2 { margin: 0; padding: 0; color: #fff; line-height: 24px; font-size: 28px; font-weight: 900; font-family: Tahoma, Geneva, sans-serif;}
+        .new-KJ-TabBox-box-con .kj-ball .whsx { display: inline-block; height: 19px; line-height: 19px; margin-top: 6px; padding: 0 6px; border-radius: 2px; color: #333; font-size: 14px; background: #fff;}
+        .new-KJ-TabBox-box-con .kj-add { display: flex; align-items: center; margin-right: 8px; font-size: 32px; font-weight: bold;}
+        .new-KJ-TabBox-box-foot { display: flex; align-items: center;font-size: 16px;}
+        .new-KJ-TabBox-box-foot-l { flex: 1;}
+        .new-KJ-TabBox-box-foot-r {}
+        .new-KJ-TabBox-box-foot-r-sx { display: inline-block; width: 40px; height: 20px; line-height: 20px; text-align: center; color: #fff; border-radius: 4px; background: #FF9900;}
+        @media screen and (max-width: 650px) {
+            .new-KJ-TabBox-box { font-size: 14px;}
+            .new-KJ-TabBox-box-tit { font-size: 16px;}
+            .new-KJ-TabBox-box-con .kj-ball { margin-right: 4px;}
+            .new-KJ-TabBox-box-con .kj-ball:nth-last-child(3) { margin-right: 4px;}
+            .new-KJ-TabBox-box-con .kj-ball h2 { font-size: 24px;}
+            .new-KJ-TabBox-box-con .kj-ball .whsx { margin-top: 4px; padding: 0 2px; font-size: 12px;}
+            .new-KJ-TabBox-box-con .kj-add { margin-right: 4px;}
+            .new-KJ-TabBox-box-con .kj-add { font-size: 24px;}
+            .new-KJ-TabBox-box-foot {font-size: 15px;}
+        }
+        @media screen and (max-width:450px) {
+            /*.new-KJ-TabBox-box-tit-m .kj-lotto-tit2 span:first-child{display:none;}*/
+        }
+    </style>
+</head>
+<body onselectstart="javascript:return(false);" oncontextmenu="javascript:return(false);" style="">
+<noscript><iframe src="*.htm"></iframe></noscript>
+<textarea readonly="" id="shareInfo" name="shareInfo" style="position:absolute;top:-9999px;"></textarea>
+
+<div class="new-KJ-TabBox-box">
+    <div class="new-KJ-TabBox-box-tit">
+        <div class="new-KJ-TabBox-box-tit-l">新香港六合彩 第<font class="kj-font-red">2026<span id="qishu"></span></font>期</div>
+        <div class="new-KJ-TabBox-box-tit-m">
+            <div class='kj-lotto-tit2'>
+                <span id="djs"><span class="hour">00</span>:<span class="minute"></span>:<span class="second">00</span></span>
+            </div>
+        </div>
+        <div class="new-KJ-TabBox-box-tit-r" id="lishi">
+            <!--<a target="_blank" href="http://18.167.124.127/kjmchistory.html" class="kj-font-red">历史记录</a>-->
+        </div>
+    </div>
+    <div class="new-KJ-TabBox-box-con"  id="jingtaihtml">
+        <div id=w1 class="kj-ball box">
+            <h2><div id="m1"></div></h2>
+            <div id="m1x" class="whsx"></div>
+        </div>
+        <div id=w2 class="kj-ball box">
+            <h2><div id="m2"></div></h2>
+            <div id="m2x" class="whsx"></div>
+        </div>
+        <div id=w3 class="kj-ball box">
+            <h2><div id="m3"></div></h2>
+            <div id="m3x" class="whsx"></div>
+        </div>
+        <div id=w4 class="kj-ball box">
+            <h2><div id="m4"></div></h2>
+            <div id="m4x" class="whsx"></div>
+        </div>
+        <div id=w5 class="kj-ball box">
+            <h2><div id="m5"></div></h2>
+            <div id="m5x" class="whsx"></div>
+        </div>
+        <div id=w6 class="kj-ball box">
+            <h2><div id="m6"></div></h2>
+            <div id="m6x" class="whsx"></div>
+        </div>
+        <div class="kj-add">+</div>
+        <div id=w7 class="kj-ball box">
+            <h2><div id="s1"></div></h2>
+            <div id="s1x" class="whsx"></div>
+        </div>
+    </div>
+    <div class="new-KJ-TabBox-box-foot">
+        <div class="new-KJ-TabBox-box-foot-l">第<font class="kj-font-red">2026<span id="nextqishu"></span></font>期：<span id=nexttime></span>分</div><div class="new-KJ-TabBox-box-foot-r"><a class="new-KJ-TabBox-box-foot-r-sx"  style="cursor:pointer;" onClick="javascript:window.location.reload();">刷新</a></div>
+    </div>
+</div>
+
+<script>
+            var last = 0; //显示计数
+            var showit = 0;
+            var data; //获取的数据
+            var ballArray = [];
+            var step = 0;
+            var start = 0;
+            var startDjs = 0;
+            init();
+            function init(){
+                getBall();
+            }
+            function getBall(){
+                $(function(){
+                    $.ajax({
+                        url: 'ajax_get.php?site='+ 70,
+                        data: '',
+                        success: function(res){
+                            showriqi(res.other);
+                            if(res.start == 0){
+                                //alert(res.data);
+                                var others = res.other;
+                                
+                                showhtml(res.data);
+                                
+                                if(startDjs == 0){
+                                    countDown(others.nexttime, others.servertime, "#djs");
+                                    startDjs = 1;
+                                }
+
+                            }else{
+                                showkaijiangHtml();
+                                //if (res.data.length > 0){
+                                    showhtml(res.data);
+                               // }
+                                
+                            }
+                        },
+                        dataType: 'JSON'
+                    });
+                })
+            }
+
+            function showriqi(data){
+                $("#qishu").html(data.qishu);
+                $("#nextqishu").html(data.nextqishu);
+                $("#nexttime").html(data.riqi);
+                
+            }
+
+            lishi.innerHTML='<a style="text-decoration: none;color:#07c160;" href="https://4989028.com/index/index/history" target="_top">历史记录</a>';
+
+           function showhtml(data){
+                //alert(data);
+                $.each(data, function(i, item) { //这里的函数参数是键值对的形式，k代表键名，v代表值
+                    if(item.tit == 0 || item.tit == null) {
+
+                    }else{
+                        // html ='<div class="table '+ item.class+'">'+ item.tit+'</div><div class="sx"><div  class="m1x">'+ item.tit0 + '/' + item.wx+ '</div></div>';
+                        html = `<h2><div id="m5">${item.tit}</div></h2>
+                                <div id="m5x" class="whsx">${item.tit0}/${item.wx}</div>`;
+                        if (item.class == "redBoClass") {
+                            $('#w'+i).css("background-color","rgb(231, 22, 7)");
+                        } else if (item.class == "greenBoClass") {
+                            $('#w'+i).css("background-color","rgb(31, 182, 29)");
+                        } else {
+                            $('#w'+i).css("background-color","rgb(35, 137, 233)");
+                        }
+                        $('#w'+i).css("color","rgb(255, 255, 255)");
+                        $('#w'+i).html(html);
+                    }
+
+                });
+
+               setTimeout("init()",2000);
+            }
+
+            // function showkaijiangHtml(){
+            //     $("#jingtaihtml").html('	<div class="kj-lotto-box"><ul><li><span class="p" id="nowball0"><img src="/images/qq1.png" width="100%">与</span></li><li><span class="p" id="nowball1"><img src="/images/ww1.png" width="100%">官</span></li><li><span class="p" id="nowball2"><img src="/images/ee1.png" width="100%">网</span></li><li><span class="p" id="nowball3"><img src="/images/rr1.png" width="100%">同</span></li><li><span class="p" id="nowball4"><img src="/images/tt1.png" width="100%">步</span></li><li><span class="p" id="nowball5"><img src="/images/yy1.png" width="100%">中</span></li><li class="jianhao"><span><img src="/images/jianhao1.png" alt=""></span></li><li><span class="p" id="nowball6"><img src="/images/uu1.png" width="100%"><span>.</span></span></li></ul></div>');
+            // }
+            function showkaijiangHtml(){
+               var html = `<div id=w1 class="kj-ball box" >
+                            <h2><div id="m1">正</div></h2>
+                            <div id="m1x" class="whsx">与</div>
+                        </div>
+                        <div id=w2 class="kj-ball box">
+                            <h2><div id="m2">在</div></h2>
+                            <div id="m2x" class="whsx">新</div>
+                        </div>
+                        <div id=w3 class="kj-ball box">
+                            <h2><div id="m3">等</div></h2>
+                            <div id="m3x" class="whsx">香</div>
+                        </div>
+                        <div id=w4 class="kj-ball box">
+                            <h2><div id="m4">待</div></h2>
+                            <div id="m4x" class="whsx">港</div>
+                        </div>
+                        <div id=w5 class="kj-ball box">
+                            <h2><div id="m5">开</div></h2>
+                            <div id="m5x" class="whsx">六</div>
+                        </div>
+                        <div id=w6 class="kj-ball box">
+                            <h2><div id="m6">奖</div></h2>
+                            <div id="m6x" class="whsx">合</div>
+                        </div>
+                        <div class ="kj-add">+</div>
+                        <div id    =w7 class="kj-ball box">
+                        <h2><div id="s1">中</div></h2>
+                        <div id    ="s1x" class="whsx">彩</div>
+                        </div>`;
+
+                    $("#jingtaihtml").html(html);
+                    for (let i = 1; i <= 7; i++) {
+                        $('#w'+i).css("background-color","rgb(211 205 205)");
+                        $('#w'+i).css("color","rgb(255, 255, 255)");
+                    }
+            }
+        </script>
+
+</body>
+    </html>
+    

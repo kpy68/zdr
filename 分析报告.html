@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>六合彩系统架构分析</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family: 'Microsoft YaHei', '微软雅黑', sans-serif; background:#1a1a2e; color:#eee; overflow:hidden; }
+  .slide { width:100vw; height:100vh; padding:60px 80px; display:none; flex-direction:column; justify-content:center; }
+  .slide.active { display:flex; }
+  h1 { font-size:48px; color:#e94560; margin-bottom:20px; text-shadow:2px 2px 4px rgba(0,0,0,.5); }
+  h2 { font-size:36px; color:#0f3460; background:#e94560; padding:15px 30px; border-radius:10px; margin-bottom:30px; display:inline-block; }
+  h3 { font-size:26px; color:#e94560; margin:15px 0; }
+  p, li { font-size:20px; line-height:1.8; }
+  ul { margin-left:30px; }
+  .big { font-size:64px; font-weight:bold; text-align:center; }
+  .code { background:#0d0d1a; color:#00ff88; padding:20px; border-radius:8px; font-family:Consolas, monospace; font-size:16px; margin:10px 0; }
+  .flow-chart { display:flex; align-items:center; justify-content:center; gap:15px; flex-wrap:wrap; margin:20px 0; }
+  .box { padding:15px 25px; border-radius:10px; font-size:18px; text-align:center; font-weight:bold; min-width:120px; }
+  .box-blue { background:#0f3460; border:2px solid #16213e; }
+  .box-red { background:#e94560; border:2px solid #c73659; }
+  .box-green { background:#0f6b4f; border:2px solid #0a4a37; }
+  .box-yellow { background:#b7862a; border:2px solid #8a6420; }
+  .arrow { font-size:30px; color:#e94560; font-weight:bold; }
+  table { width:100%; border-collapse:collapse; margin:10px 0; }
+  th, td { padding:12px 15px; text-align:left; border-bottom:1px solid #333; font-size:18px; }
+  th { background:#e94560; color:#fff; }
+  tr:nth-child(even) { background:#16213e; }
+  .tag { display:inline-block; padding:3px 10px; border-radius:5px; font-size:14px; margin-right:5px; }
+  .tag-red { background:#e94560; }
+  .tag-green { background:#0f6b4f; }
+  .tag-blue { background:#0f3460; }
+  .nav { position:fixed; bottom:30px; right:30px; display:flex; gap:15px; z-index:100; }
+  .nav button { background:#e94560; border:none; color:#fff; padding:12px 25px; border-radius:25px; font-size:16px; cursor:pointer; font-weight:bold; }
+  .nav button:hover { background:#c73659; }
+  .page-num { position:fixed; bottom:35px; left:30px; font-size:18px; color:#888; }
+  .center { text-align:center; }
+  .two-col { display:grid; grid-template-columns:1fr 1fr; gap:40px; }
+</style>
+</head>
+<body>
+
+<div class="slide active">
+  <div class="center">
+    <h1>🎰 六合彩系统架构分析</h1>
+    <div style="font-size:28px; margin-top:30px; color:#aaa;">文件夹完整数据流 & 文件作用</div>
+    <div style="margin-top:60px; font-size:22px;">2026-11-16</div>
+  </div>
+</div>
+
+<div class="slide">
+  <h2>一、整体架构</h2>
+  <h3>这是一个什么系统？</h3>
+  <p style="font-size:24px; color:#00ff88; margin:20px 0;">✅ 离线镜像网站 + 后台管理系统</p>
+  <ul>
+    <li>从 <b>www.4989028.com</b> 抓取的原始页面 → 存本地 → 服务端期号偏移 → 渲染给用户</li>
+    <li>不是在线代理，是纯本地静态文件 + 动态替换</li>
+    <li>原始 HTML 是期号 317 的旧页面，后台开奖开到 328 期，服务器自动偏移期号 +11</li>
+  </ul>
+  
+  <h3 style="margin-top:30px;">数据流：</h3>
+  <div class="flow-chart">
+    <div class="box box-blue">原始 HTML<br>(期号 317)</div>
+    <div class="arrow">→</div>
+    <div class="box box-red">Node.js 中间件</div>
+    <div class="arrow">→</div>
+    <div class="box box-yellow">期号 +11 偏移</div>
+    <div class="arrow">→</div>
+    <div class="box box-green">渲染给用户<br>(期号 328)</div>
+  </div>
+</div>
+
+<div class="slide">
+  <h2>二、文件夹结构总览</h2>
+  <table>
+    <tr><th>目录/文件</th><th>作用</th><th>大小</th></tr>
+    <tr><td>admin/server.js</td><td><span class="tag tag-red">核心</span>Node.js 后端，Express 中间件</td><td>~9KB</td></tr>
+    <tr><td>admin/data.json</td><td><span class="tag tag-red">开奖数据</span>历史开奖记录</td><td>小</td></tr>
+    <tr><td>admin/content.json</td><td><span class="tag tag-blue">资料数据</span>14个栏目的生肖资料</td><td>中</td></tr>
+    <tr><td>admin/public/admin.html</td><td><span class="tag tag-red">后台页面</span>开奖/管理界面</td><td>92KB</td></tr>
+    <tr><td>admin/public/kj.html</td><td>开奖展示页面</td><td>8KB</td></tr>
+    <tr><td>www.4989028.com/</td><td><span class="tag tag-green">主站镜像</span>566KB index.html + 图片/子页</td><td>大</td></tr>
+    <tr><td>aoda2889.com/</td><td>另一个镜像网站（澳门六合彩）</td><td>大</td></tr>
+    <tr><td>tk9901149.com/tuku/</td><td>图片素材缓存（图纸图片）</td><td>中</td></tr>
+    <tr><td>tuku.76116tk.com/</td><td>更多图片素材</td><td>中</td></tr>
+    <tr><td>hts-cache/</td><td>HTS 下载器缓存（原始抓取工具）</td><td>小</td></tr>
+    <tr><td>xg.4989028.xyz/</td><td>另一个站点子目录</td><td>小</td></tr>
+  </table>
+</div>
+
+<div class="slide">
+  <h2>三、admin/server.js 核心逻辑</h2>
+  <p>这个文件是整个系统的大脑，负责：</p>
+  <div class="two-col" style="margin-top:20px;">
+    <div>
+      <h3>🔴 中间件（请求拦截）</h3>
+      <ul>
+        <li>拦截所有 .html 请求</li>
+        <li>读原始 HTML 文件</li>
+        <li>调用 replaceIssueNos() 期号偏移</li>
+        <li>替换图片 URL 中的期号</li>
+        <li>返回渲染后的 HTML</li>
+      </ul>
+    </div>
+    <div>
+      <h3>🔵 API 接口</h3>
+      <ul>
+        <li>POST /api/admin/draw → 开奖</li>
+        <li>GET /api/kj → 查询开奖数据</li>
+        <li>POST /api/admin/content/auto-update → 生成资料</li>
+        <li>GET /api/admin/content → 读资料</li>
+        <li>GET /api/admin/history → 历史记录</li>
+      </ul>
+    </div>
+  </div>
+  <div class="code" style="margin-top:20px;">
+// 启动时自动：
+// 1. 从 data.json 读 latest (最高期号)
+// 2. 从 content.json 读资料
+// 3. 计算 offset = latest - 原始HTML最高期号
+// 4. 定时检查（已停用），防止外部覆盖
+  </div>
+</div>
+
+<div class="slide">
+  <h2>四、为什么更改开奖期数后资料会变？</h2>
+  <h3 style="color:#ff6b6b;">🔍 关键：期号偏移 (Issue Offset)</h3>
+  <div class="code">
+// replaceIssueNos() 函数逻辑:
+var origMax = 317;  // 扫描原始 HTML 中所有独立的 "X期" 格式，取最大值
+var curMax  = 328;  // 读取 data.json 中 history 的最高期号
+var offset  = curMax - origMax;  // = 11
+
+// 然后扫描整个 HTML，把每个期号都 +11
+// 317期 → 328期  (开奖主期)
+// 316期 → 327期  (上一期)
+// 315期 → 326期  ...
+// 图片URL中的 (317) → (328) 等
+  </div>
+  <p style="margin-top:20px;">
+    <span class="tag tag-red">所以</span> 
+    <b>你改后台开奖期数 → latest 变了 → offset 变了 → 渲染时 HTML 里的所有期号跟着偏移</b>
+  </p>
+  <p>原始 HTML 里"停留在 317 期"的资料文字，被自动偏移成了 328 期的样子。</p>
+</div>
+
+<div class="slide">
+  <h2>五、当前数据流图解</h2>
+  <div class="flow-chart" style="flex-direction:column; align-items:stretch;">
+    <div class="box box-blue" style="padding:20px;">
+      📄 www.4989028.com/index.html<br>
+      <span style="font-size:14px;">原始镜像 · 最高期号 317</span>
+    </div>
+    <div class="arrow" style="text-align:center;">↓ 读取</div>
+    <div class="box box-red" style="padding:20px;">
+      🔧 replaceIssueNos()<br>
+      <span style="font-size:14px;">扫描所有 "X期" → 每个 +11</span>
+    </div>
+    <div class="arrow" style="text-align:center;">↓ offset=11</div>
+    <div class="box box-yellow" style="padding:20px;">
+      🔄 偏移后的 HTML<br>
+      <span style="font-size:14px;">317→328, 316→327, 图片(317)→(328)</span>
+    </div>
+    <div class="arrow" style="text-align:center;">↓ 返回</div>
+    <div class="box box-green" style="padding:20px;">
+      🌐 用户浏览器<br>
+      <span style="font-size:14px;">看到的是期号 328 的页面</span>
+    </div>
+  </div>
+</div>
+
+<div class="slide">
+  <h2>六、content.json 资料为什么没显示？</h2>
+  <table>
+    <tr><th>时间点</th><th>发生了什么</th></tr>
+    <tr><td>之前</td><td>我写了 renderSectionsIntoHtml() 函数，扫描 HTML 所有栏目前插入 nextQ 期生肖</td></tr>
+    <tr><td>后来</td><td>你说"新增的资料集中在开奖框下面了，不是相同的资料" → 我重写了逐栏目插入</td></tr>
+    <tr><td>最后</td><td>你说"资料不用添加了，因为不是相同的资料，而且生成的不对" → 我删了调用</td></tr>
+    <tr><td>现在</td><td>中间件<b>只做期号偏移</b>，content.json 虽然有数据但不再注入 HTML</td></tr>
+  </table>
+  <h3 style="margin-top:25px;">当前 content.json 状态：</h3>
+  <ul>
+    <li>14 个栏目：content_wucuo / content_jinshu / content_sanxiao ...</li>
+    <li>最高有到 <b>330 期</b> 的生肖数据（后台自动生成的）</li>
+    <li>但页面只显示原始 HTML + 期号偏移，不读取这些生肖</li>
+  </ul>
+</div>
+
+<div class="slide">
+  <h2>七、关键数据文件详解</h2>
+  <div class="two-col">
+    <div>
+      <h3>📁 admin/data.json</h3>
+      <div class="code" style="font-size:14px;">
+{
+  "latest": {
+    "qishu": 328,
+    "balls": [1, 2, 3, 4, 5, 6, 7]
+  },
+  "history": [
+    {"qishu":328, "balls":[...]},
+    {"qishu":327, "balls":[...]},
+    ...
+  ]
+}
+      </div>
+      <p>👉 latest 永远 = history 中最高期号</p>
+    </div>
+    <div>
+      <h3>📁 admin/content.json</h3>
+      <div class="code" style="font-size:14px;">
+{
+  "content_jingxuan": [
+    {
+      "issue": "330期",
+      "zodiacs": ["狗","马","龙","蛇"]
+    },
+    {
+      "issue": "329期",
+      "zodiacs": ["牛","羊","兔","虎"]
+    }
+  ],
+  "content_sanxiao": [...],
+  "content_wucuo": [...]
+}
+      </div>
+      <p>👉 14 个栏目，每期一组生肖/数字</p>
+    </div>
+  </div>
+</div>
+
+<div class="slide">
+  <h2>八、后台 API 一览</h2>
+  <table>
+    <tr><th>接口</th><th>方法</th><th>作用</th></tr>
+    <tr><td>/api/kj</td><td>GET</td><td>前端读开奖数据（balls + qishu）</td></tr>
+    <tr><td>/api/admin/draw</td><td>POST</td><td>后台开奖，自动存 history + 自动生成 nextQ 期资料</td></tr>
+    <tr><td>/api/admin/history</td><td>GET</td><td>后台读历史开奖</td></tr>
+    <tr><td>/api/admin/delete</td><td>POST</td><td>后台删某一期开奖记录</td></tr>
+    <tr><td>/api/admin/content</td><td>GET</td><td>读 content.json 全部资料</td></tr>
+    <tr><td>/api/admin/content/auto-update</td><td>POST</td><td>一键生成 latest+1 期所有栏目资料</td></tr>
+    <tr><td>/api/admin/content/save</td><td>POST</td><td>手动保存某栏目资料</td></tr>
+  </table>
+</div>
+
+<div class="slide">
+  <h2>九、图片也会跟着期号变！</h2>
+  <p>replaceIssueNos() 不仅改文字期号，还会改 HTML 中图片 URL 的期号：</p>
+  <div class="code">
+<!-- 原始 HTML 中的图片链接 -->
+<img src="tk9901149.com/tuku/bzp/c256(317).jpg">
+<img src="tk9901149.com/tuku/xlnxj/xlnxj(317).jpg">
+
+<!-- 被中间件自动偏移后 -->
+<img src="tk9901149.com/tuku/bzp/c256(328).jpg">
+<img src="tk9901149.com/tuku/xlnxj/xlnxj(328).jpg">
+  </div>
+  <p style="margin-top:15px; color:#ff6b6b;">⚠️ 但磁盘上只有 c256(317).jpg 这一张图！服务器不会自动生成 328 的图片，所以图片会显示 404 或错误。</p>
+  <p>👉 如果你有每期的图纸图片，需要提前放到对应路径下，或者用脚本批量重命名/复制。</p>
+</div>
+
+<div class="slide">
+  <h2>十、系统特点总结</h2>
+  <div class="two-col">
+    <div>
+      <h3>✅ 优点</h3>
+      <ul>
+        <li>纯本地，不依赖外部接口</li>
+        <li>期号自动偏移，改一次后台全站同步</li>
+        <li>开奖自动生成下一期资料</li>
+        <li>删除开奖记录自动回退 latest</li>
+        <li>重复期号/数字前后端双重校验</li>
+      </ul>
+    </div>
+    <div>
+      <h3>⚠️ 限制</h3>
+      <ul>
+        <li>图片不会自动生成（需手动放每期图）</li>
+        <li>content.json 有生肖数据但不注入页面</li>
+        <li>原始 HTML 是 317 期旧版，偏移只是"换数字"</li>
+        <li>外部定时抓取已停用（曾覆盖 latest）</li>
+      </ul>
+    </div>
+  </div>
+  <p style="margin-top:30px; color:#00ff88; font-size:22px;">
+    🎯 核心原理 = 离线镜像 + 服务端期号偏移 + 后台数据管理
+  </p>
+</div>
+
+<div class="slide">
+  <div class="center">
+    <h1>结束</h1>
+    <div style="font-size:26px; margin-top:40px; color:#aaa;">需要我调整什么功能，随时说！</div>
+  </div>
+</div>
+
+<div class="nav">
+  <button onclick="prevSlide()">← 上一页</button>
+  <button onclick="nextSlide()">下一页 →</button>
+</div>
+<div class="page-num" id="pageNum"></div>
+
+<script>
+  var slides = document.querySelectorAll('.slide');
+  var cur = 0;
+  function show(i){
+    slides[cur].classList.remove('active');
+    cur = (i + slides.length) % slides.length;
+    slides[cur].classList.add('active');
+    document.getElementById('pageNum').textContent = (cur+1) + ' / ' + slides.length;
+  }
+  function nextSlide(){ show(cur+1); }
+  function prevSlide(){ show(cur-1); }
+  document.addEventListener('keydown', function(e){
+    if(e.key==='ArrowRight') nextSlide();
+    if(e.key==='ArrowLeft') prevSlide();
+  });
+  show(0);
+</script>
+
+</body>
+</html>
